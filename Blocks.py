@@ -23,15 +23,50 @@ class Simulator(object):
             return facts
 
         for stack in self.state:
+            st_id = self.state.index(stack)
             n_blocks = len(stack)
             if not n_blocks:
                 continue
-            facts.append("clear(s"+str(self.n)+","+str(stack[0])+")")
+            facts.append("clear(s"+str(self.n)+",t"+str(st_id)+","+str(stack[0])+")")
             for i in range(n_blocks-1):
-                facts.append("on(s"+str(self.n)+","+str(stack[i])+","+str(stack[i+1])+")")
-            facts.append("table(s"+str(self.n)+","+str(stack[n_blocks-1])+")")
+                facts.append("on(s"+str(self.n)+",t"+str(st_id)+","+str(stack[i])+","+str(stack[i+1])+")")
+            facts.append("table(s"+str(self.n)+",t"+str(st_id)+","+str(stack[n_blocks-1])+")")
 
         return facts
+
+    def vector_rep(self):
+        """returns vector representation
+           for traditional machine learning
+           block can be on table
+           block can also be clear
+           block can be on other blocks
+           so dim(vector) = n_blocks + 2
+        """
+
+        vector = {}
+        blocks = {}
+        block_c = 2
+
+        for stack in self.state:
+            for block in stack:
+                if block not in blocks:
+                    blocks[block] = block_c
+                    block_c += 1
+
+        for block in blocks:
+            block_vector = [0 for i in range(len(blocks) + 2)]
+            for stack in self.state:
+                if block == stack[0]: #clear
+                    block_vector[1] = 1
+                if block == stack[len(stack) - 1]: #table
+                    block_vector[0] = 1
+                elif block in stack: #on other blocks
+                    on_block = stack[stack.index(block) + 1]
+                    block_vector[blocks[on_block]] = 1
+            vector[block] = block_vector
+
+        return vector
+            
 
     def __repr__(self):
         """call to print returns this
@@ -91,8 +126,8 @@ class Simulator(object):
         return next_state
 
 #============= TESTING CODE ====================
-'''
 
+'''
 s0 = Simulator([['a','b'],['c','d','e']],[['a','b','c','d','e']])
 s1 = s0.act([0,1])
 s2 = s1.act([1,0,1])
@@ -101,5 +136,5 @@ print ('-'*40)
 print (s1)
 print ('-'*40)
 print (s2)
+'''
 
-'''               
