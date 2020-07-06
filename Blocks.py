@@ -23,14 +23,13 @@ class Simulator(object):
             return facts
 
         for stack in self.state:
-            st_id = self.state.index(stack)
             n_blocks = len(stack)
             if not n_blocks:
                 continue
-            facts.append("clear(s"+str(self.n)+",t"+str(st_id)+","+str(stack[0])+")")
+            facts.append("clear(s"+str(self.n)+","+str(stack[0])+")")
             for i in range(n_blocks-1):
-                facts.append("on(s"+str(self.n)+",t"+str(st_id)+","+str(stack[i])+","+str(stack[i+1])+")")
-            facts.append("table(s"+str(self.n)+",t"+str(st_id)+","+str(stack[n_blocks-1])+")")
+                facts.append("on(s"+str(self.n)+","+str(stack[i])+","+str(stack[i+1])+")")
+            facts.append("table(s"+str(self.n)+","+str(stack[n_blocks-1])+")")
 
         return facts
 
