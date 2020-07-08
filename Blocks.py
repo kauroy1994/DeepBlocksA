@@ -185,14 +185,14 @@ class Simulator(object):
                     return action
 
     @staticmethod
-    def backward_episode(times = 5,goal = [['a','b','c']]):
+    def backward_episode(times = 5,goal = [['a','b','c']],s_number = 0):
         """generates trajectories by
            random permutations from
            goal state
         """
         
-        s = Blocks(goal,[])
-        episode = [s]
+        s = Blocks(goal,[],n = s_number)
+        episode = [[s]]
         for i in range(times):
             while True:
                 action = s.random()
@@ -202,7 +202,7 @@ class Simulator(object):
                     s_prev = deepcopy(s)
                     s = s.act(action)
                     forward_action = Simulator.policy(s,s_prev)
-                    episode = [(deepcopy(s),deepcopy(forward_action))] + episode
+                    episode = [[deepcopy(s),deepcopy(forward_action)]] + episode
                     break
         return (episode)
             
@@ -213,9 +213,10 @@ class Simulator(object):
 '''
 episode = Simulator.backward_episode()
 for item in episode[:-1]:
-    print (item[0].state,item[1])
-print (episode[-1].state)
+    print (item[0],item[1])
+print (episode[-1][0])
 '''
+
 
 
 
