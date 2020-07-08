@@ -1,6 +1,6 @@
 # DeepBlocksA
 
-Experiments on [DeepCubeA](http://deepcube.igb.uci.edu) applied to Blocks World
+Experiments on [DeepCubeA](http://deepcube.igb.uci.edu) algorithm applied to Blocks World
 
 Based on papers:
 
