@@ -160,15 +160,29 @@ class Blocks(object):
             next_state.state[action[1]] = i_stack[1:]
             next_state.state.append([top])
 
-        elif action[0] == 2:
-            return self
-
         return next_state
 
 
 class Simulator(object):
     """to simulate the world
     """
+
+    @staticmethod
+    def policy(s_prev,s):
+        """finds policy that leads
+           from s_prev -> s
+        """
+
+        while True:
+            action = s_prev.random()
+            if not s_prev.act(action):
+                continue
+            else:
+                s_next = s_prev.act(action)
+                if str(s_next).split(':')[2] != str(s).split(':')[2]:
+                    continue
+                else:
+                    return action
 
     @staticmethod
     def backward_episode(times = 5,goal = [['a','b','c']]):
@@ -181,12 +195,14 @@ class Simulator(object):
         episode = [s]
         for i in range(times):
             while True:
-                action = Blocks.random(s)
+                action = s.random()
                 if not s.act(action):
                     continue
                 else:
+                    s_prev = deepcopy(s)
                     s = s.act(action)
-                    episode = [(deepcopy(s),deepcopy(action))] + episode
+                    forward_action = Simulator.policy(s,s_prev)
+                    episode = [(deepcopy(s),deepcopy(forward_action))] + episode
                     break
         return (episode)
             
@@ -196,9 +212,11 @@ class Simulator(object):
 
 '''
 episode = Simulator.backward_episode()
-for item in episode:
-    print (item)
+for item in episode[:-1]:
+    print (item[0].state,item[1])
+print (episode[-1].state)
 '''
+
 
 
 
