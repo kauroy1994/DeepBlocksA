@@ -1,6 +1,7 @@
 from copy import deepcopy
+from random import choice
 
-class Simulator(object):
+class Blocks(object):
 
     def __init__(self,start,goal,n = 0):
         """start: list of block stacks
@@ -89,6 +90,23 @@ class Simulator(object):
 
         return out
 
+    def random(self):
+        """returns random valid action
+        """
+
+        random_action = [choice([0,1])] #stack/putdown
+        
+        if random_action[0] == 1: #stack
+            stacks = range(len(self.state))
+            random_action += [choice(stacks)] #from
+            random_action += [choice(stacks)] #to
+        
+        elif random_action[0] == 0: #putdown
+            stacks = range(len(self.state))
+            random_action += [choice(stacks)] #from
+
+        return random_action
+            
     def act(self,action):
         """[1,i,j]: stacks block from i to j
            [0,i]: puts down block from i on table
@@ -99,18 +117,37 @@ class Simulator(object):
         
         if action[0] == 1:
 
+            if action[1] > len(next_state.state)-1:
+                #invalid action
+                return False
+
             i_stack = next_state.state[action[1]]
+
+            if action[2] > len(next_state.state)-1:
+                #invalid action
+                return False
+            
             j_stack = next_state.state[action[2]]
+
             
             if not i_stack:
+                #invalid action
+                return False
+
+            if i_stack == j_stack:
                 #invalid action
                 return False
             
             top = i_stack[0]
             next_state.state[action[1]] = i_stack[1:]
             next_state.state[action[2]] = [top] + j_stack
+            next_state.state = [item for item in next_state.state if item]
 
         elif action[0] == 0:
+
+            if action[1] > len(next_state.state)-1:
+                #invalid action
+                return False
 
             i_stack = next_state.state[action[1]]
 
@@ -124,16 +161,39 @@ class Simulator(object):
 
         return next_state
 
+
+class Simulator(object):
+    """to simulate the world
+    """
+
+    @staticmethod
+    def backward_episode(times = 5,goal = [['a','b','c']]):
+        """generates trajectories by
+           random permutations from
+           goal state
+        """
+        
+        s = Blocks(goal,[])
+        episode = [s]
+        for i in range(times):
+            while True:
+                action = Blocks.random(s)
+                if not s.act(action):
+                    continue
+                else:
+                    s = s.act(action)
+                    episode = [(deepcopy(s),deepcopy(action))] + episode
+                    break
+        return (episode)
+            
+        
+
 #============= TESTING CODE ====================
 
 '''
-s0 = Simulator([['a','b'],['c','d','e']],[['a','b','c','d','e']])
-s1 = s0.act([0,1])
-s2 = s1.act([1,0,1])
-print (s0)
-print ('-'*40)
-print (s1)
-print ('-'*40)
-print (s2)
+episode = Simulator.backward_episode()
 '''
+
+
+
 
