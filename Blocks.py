@@ -94,7 +94,7 @@ class Blocks(object):
         """returns random valid action
         """
 
-        random_action = [choice([0,1])] #stack/putdown
+        random_action = [choice([0,1,2])] #stack/putdown/no-op
         
         if random_action[0] == 1: #stack
             stacks = range(len(self.state))
@@ -104,6 +104,7 @@ class Blocks(object):
         elif random_action[0] == 0: #putdown
             stacks = range(len(self.state))
             random_action += [choice(stacks)] #from
+
 
         return random_action
             
@@ -159,6 +160,9 @@ class Blocks(object):
             next_state.state[action[1]] = i_stack[1:]
             next_state.state.append([top])
 
+        elif action[0] == 2:
+            return self
+
         return next_state
 
 
@@ -192,6 +196,8 @@ class Simulator(object):
 
 '''
 episode = Simulator.backward_episode()
+for item in episode:
+    print (item)
 '''
 
 
