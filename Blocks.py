@@ -167,6 +167,12 @@ class Simulator(object):
     """to simulate the world
     """
 
+    bk = ['on(+state,+block,-block)',
+          'on(+state,-block,+block)',
+          'clear(+state,+block)',
+          'table(+state,+block)',
+          'v(+state)']
+
     @staticmethod
     def policy(s_prev,s):
         """finds policy that leads
