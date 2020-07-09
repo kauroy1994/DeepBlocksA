@@ -115,19 +115,14 @@ class PhiMap(object):
                 #if '-' then set with new var not in clause
                 elif spec[0] == '-':
                     typ = spec[1:]
-
-                    seen = False
                     for var in PhiMap.all_vars:
-                        if (var in node_var_types) and (node_var_types[var] == typ) and (var not in var_types):
+                        seen = False
+                        if ((var in node_var_types) and (node_var_types[var] == typ)) or ((var in var_types)):
                             seen = True
+                        if not seen:
                             args[i].append(var)
+                            node_var_types[var] = typ
                             break
-                    if not seen:
-                        for new_var in PhiMap.all_vars:
-                            if new_var not in node_var_types:
-                                args[i].append(new_var)
-                                node_var_types[new_var] = typ
-                                break
 
                 #if '#' collect all constants from facts at this pos
                 elif spec[0] == '#':
@@ -185,6 +180,7 @@ class PhiMap(object):
                 for condition in conditions[0]:
                     positive_covered = False
                     negative_covered = False
+                    example_covered = False
                     node_examples = {}
                     clause = PhiMap.target_pred+':-'
                     clause += condition[0]
@@ -192,7 +188,7 @@ class PhiMap(object):
                         continue
                     example_list = list(examples.keys())
                     n = len(example_list)
-                    print ("Checking theory:",clause)
+                    #print ("Checking theory:",clause)
                     Prover.rule = clause
                     Prover.facts = facts
                     if pos and neg:
@@ -210,10 +206,12 @@ class PhiMap(object):
                     elif (not pos) or (not neg):
                         for example in example_list:
                             if Prover.prove_rule(example):
-                                node = Node(facts,node_examples,bk,clause,conditions[1])
-                                PhiMap.clauses[d].append(node)
-                                PhiMap.clause_list.append(node.clause)
-                                
+                                example_covered = True
+                                node_examples[example] = examples[example]
+                        if example_covered:
+                            node = Node(facts,node_examples,bk,clause,conditions[1])
+                            PhiMap.clauses[d].append(node)
+                            PhiMap.clause_list.append(node.clause)
 
             if d > 0:
                 #print ('='*80)
@@ -224,6 +222,7 @@ class PhiMap(object):
                     for condition in conditions[0]:
                         positive_covered = False
                         negative_covered = False
+                        example_covered = False
                         node_examples = {}
                         if condition[0] in node_conditions:
                             continue
@@ -232,7 +231,7 @@ class PhiMap(object):
                             continue
                         example_list = list(node.examples.keys())
                         n = len(example_list)
-                        print ("Checking theory:",clause)
+                        #print ("Checking theory:",clause)
                         Prover.rule = clause
                         Prover.facts = facts
                         if pos and neg:
@@ -250,9 +249,12 @@ class PhiMap(object):
                         elif (not pos) or (not neg):
                             for example in example_list:
                                 if Prover.prove_rule(example):
-                                    node = Node(facts,node_examples,bk,clause,conditions[1])
-                                    PhiMap.clauses[d].append(node)
-                                    PhiMap.clause_list.append(node.clause)
+                                    example_covered = True
+                                    node_examples[example] = examples[example]
+                            if example_covered:
+                                new_node = Node(facts,node_examples,bk,clause,conditions[1])
+                                PhiMap.clauses[d].append(new_node)
+                                PhiMap.clause_list.append(new_node.clause)
                             
         PhiMap.remove_copies()        
 
@@ -344,7 +346,7 @@ class PhiMap(object):
                     
 # --> TODO: ============ WRITE TEST CASE HERE ASAP =================
 
-"""                
+"""               
 def main():
     #main method
     
