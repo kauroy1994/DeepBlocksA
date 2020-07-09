@@ -44,7 +44,7 @@ class AVI(object):
                     examples['v(s'+str(reverse_episode[j][0].n)+')'] = -1 + (discount * v_next)
                 
             #n = len(examples) + len(episode) - 1
-            print (examples)
+            #print (examples)
             model.learn(facts,examples,bk,'v')
             #print (n)
 
