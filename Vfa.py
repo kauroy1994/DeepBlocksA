@@ -1,9 +1,10 @@
 from Blocks import Simulator
+from ML import RelLinReg
 
 class AVI(object):
 
     @staticmethod
-    def approx_value(state):
+    def approx_value(model,state):
         """returns approximate value
            of state from function approximator
         """
@@ -15,6 +16,8 @@ class AVI(object):
         """Approximate value iteration
         """
 
+        bk = Simulator.bk
+        model = RelLinReg()
         #n = 0
         for i in range(iters):
             facts = []
@@ -27,20 +30,22 @@ class AVI(object):
             if i == 0:
                 examples['v(s'+str(goal.n)+')'] = goal_value
             else:
-                examples['v(s'+str(goal.n)+')'] = AVI.approx_value(goal)
+                examples['v(s'+str(goal.n)+')'] = AVI.approx_value(model,goal)
             n_items = len(reverse_episode)
             for j in range(n_items):
                 if j == 0:
                     continue
+                facts += reverse_episode[j][0].facts()
                 if i == 0:
                     v_next = examples['v(s'+str(reverse_episode[j-1][0].n)+')']
                     examples['v(s'+str(reverse_episode[j][0].n)+')'] = -1 + (discount * v_next)
                 else:
-                    v_next = AVI.approx_value(reverse_episode[j-1][0])
+                    v_next = AVI.approx_value(model,reverse_episode[j-1][0])
                     examples['v(s'+str(reverse_episode[j][0].n)+')'] = -1 + (discount * v_next)
                 
             #n = len(examples) + len(episode) - 1
             print (examples)
+            model.learn(facts,examples,bk,'v')
             #print (n)
 
 AVI.run()
