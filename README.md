@@ -1,6 +1,8 @@
-# DeepBlocksA
+# Relational-RL
 
-Experiments on [DeepCubeA](http://deepcube.igb.uci.edu) algorithm applied to Blocks World
+Experiments on [DeepCubeA](http://deepcube.igb.uci.edu) algorithm and policy gradient methods applied to Blocks World.
+
+Monte Carlo Tree Search used for value function approximation.
 
 Based on papers:
 
