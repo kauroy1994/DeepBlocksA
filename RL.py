@@ -13,6 +13,7 @@ class MCTS(object):
         targets = list(bk.keys())
         features = {}
         n_targets = len(targets)
+        print ("Generating relational features ..")
         for i in tqdm(range(n_targets)):
             n = 0
             for j in range(iters):
