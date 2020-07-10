@@ -1,5 +1,6 @@
 from copy import deepcopy
 from random import choice
+from time import time
 
 class Blocks(object):
 
@@ -184,13 +185,21 @@ class Simulator(object):
     """to simulate the world
     """
 
-    bk = ['on(+state,+block,-block)',
-          'on(+state,-block,+block)',
-          'clear(+state,+block)',
-          'table(+state,+block)',
-          'stack(+state,+block,+block)',
-          'unstack(+state,+block)',
-          'noop(+state)']
+    bk = {'stack': ['on(+state,+block,-block)',
+                    'on(+state,-block,+block)',
+                    'clear(+state,+block)',
+                    'table(+state,+block)',
+                    'stack(+state,+block,+block)'],
+          'unstack': ['on(+state,+block,-block)',
+                      'on(+state,-block,+block)',
+                      'clear(+state,+block)',
+                      'table(+state,+block)',
+                      'unstack(+state,+block)'],
+          'noop': ['on(+state,+block,-block)',
+                   'on(+state,-block,+block)',
+                   'clear(+state,+block)',
+                   'table(+state,+block)',
+                   'noop(+state)']}
 
     @staticmethod
     def policy(s_prev,s):
@@ -198,7 +207,10 @@ class Simulator(object):
            from s_prev -> s
         """
 
+        start = time()
         while True:
+            if time() - start > 2: #maximum 2 second latency allowed
+                return False
             action = s_prev.random()
             if not s_prev.act(action):
                 continue
@@ -215,11 +227,12 @@ class Simulator(object):
            random permutations from
            goal state
         """
-        
+
         s = Blocks(goal,[],n = s_number)
-        episode = [[s]]
+        episode = [[s,s.action_pred([2])]]
         for i in range(times):
             while True:
+
                 action = s.random()
                 if not s.act(action):
                     continue
@@ -227,6 +240,8 @@ class Simulator(object):
                     s_prev = deepcopy(s)
                     s = s.act(action)
                     forward_action = Simulator.policy(s,s_prev)
+                    if not forward_action:
+                        return False
                     forward_action_pred = s.action_pred(forward_action)
                     episode = [[deepcopy(s),deepcopy(forward_action_pred)]] + episode
                     break
