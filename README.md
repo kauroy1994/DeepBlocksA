@@ -1,4 +1,4 @@
-**Relational-RL**
+# Relational-RL
 
 Experiments on [DeepCubeA](http://deepcube.igb.uci.edu) algorithm and policy gradient methods applied to Blocks World.
 
