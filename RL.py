@@ -1,7 +1,41 @@
 from Blocks import Simulator
-from ML import RelLinReg
+from ML import RepLearn
+from tqdm import tqdm
 
 class MCTS(object):
+
+    @staticmethod
+    def learn_representation(bk,iters = 2):
+        """learns representation from
+           episode data
+        """
+
+        targets = list(bk.keys())
+        features = {}
+        n_targets = len(targets)
+        for i in tqdm(range(n_targets)):
+            n = 0
+            for j in range(iters):
+                facts = []
+                examples = {}
+                episode = False
+                while True:
+                    if not episode:
+                        episode = Simulator.backward_episode(s_number = n)
+                    else:
+                        break
+                n_items = len(episode)
+                for k in range(n_items):
+                    facts += episode[k][0].facts()
+                    if episode[k][1].split('(')[0] == targets[i]:
+                        examples[episode[k][1]] = 0
+            n = 2 * len(examples ) - 1
+            features[targets[i]] = RepLearn.generate_features(facts,
+                                                              examples,
+                                                              bk[targets[i]],
+                                                              targets[i])
+        return features
+        
 
     @staticmethod
     def run(iters = 2,discount = 0.99):
@@ -9,6 +43,9 @@ class MCTS(object):
         """
 
         bk = Simulator.bk
+        features = MCTS.learn_representation(bk)
+        print (features)
+        exit()
         targets = list(bk.keys())
         models = {}
         for target in targets:
@@ -34,8 +71,8 @@ class MCTS(object):
                         counter += 1
                     if episode[j][1].split('(')[0] == target:
                         examples[episode[j][1]] = sum_reward
-            n = 2*len(examples) - 1
-            model.learn(facts,examples,bk[target],target)
+            n = 2 * len(examples) - 1
+            model.learn(features,facts,examples,bk[target],target)
             models[target] = model
 
 MCTS.run()
