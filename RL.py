@@ -4,58 +4,39 @@ from ML import RelLinReg
 class MCTS(object):
 
     @staticmethod
-    def run():
+    def run(iters = 2,discount = 0.99):
         """Monte Carlo Tree Search
         """
 
         bk = Simulator.bk
-        model = RelLinReg()
-        episode = Simulator.backward_episode()
-        print (episode)
-
-class AVI(object):
-
-    @staticmethod
-    def approx_value(model,state):
-        """returns approximate value
-           of state from function approximator
-        """
-
-        return 5
-    
-    @staticmethod
-    def run(iters = 2, goal_value = 5, discount = 1):
-        """Approximate value iteration
-        """
-
-        bk = Simulator.bk
-        model = RelLinReg()
-        #n = 0
-        for i in range(iters):
-            facts = []
-            examples = {}
-            target = 'v'
-            episode = Simulator.backward_episode()
-            reverse_episode = episode[::-1]
-            goal = reverse_episode[0][0]
-            facts += goal.facts()
-            if i == 0:
-                examples['v(s'+str(goal.n)+')'] = goal_value
-            else:
-                examples['v(s'+str(goal.n)+')'] = AVI.approx_value(model,goal)
-            n_items = len(reverse_episode)
-            for j in range(n_items):
-                if j == 0:
-                    continue
-                facts += reverse_episode[j][0].facts()
-                if i == 0:
-                    v_next = examples['v(s'+str(reverse_episode[j-1][0].n)+')']
-                    examples['v(s'+str(reverse_episode[j][0].n)+')'] = -1 + (discount * v_next)
-                else:
-                    v_next = AVI.approx_value(model,reverse_episode[j-1][0])
-                    examples['v(s'+str(reverse_episode[j][0].n)+')'] = -1 + (discount * v_next)
-                
-            model.learn(facts,examples,bk,'v')
+        targets = list(bk.keys())
+        models = {}
+        for target in targets:
+            print ("target:",target)
+            model = RelLinReg()
+            n = 0
+            for i in range(iters):
+                facts = []
+                examples = {}
+                episode = False
+                while True:
+                    if not episode:
+                        episode = Simulator.backward_episode(s_number = n)
+                    else:
+                        break
+                n_items = len(episode)
+                for j in range(n_items):
+                    facts += episode[j][0].facts()
+                    sum_reward = 0
+                    counter = 1
+                    for k in range(j+1,n_items):
+                        sum_reward += (discount**counter)*1 #or -1
+                        counter += 1
+                    if episode[j][1].split('(')[0] == target:
+                        examples[episode[j][1]] = sum_reward
+            n = 2*len(examples) - 1
+            model.learn(facts,examples,bk[target],target)
+            models[target] = model
 
 MCTS.run()
         
