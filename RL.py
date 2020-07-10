@@ -1,6 +1,18 @@
 from Blocks import Simulator
 from ML import RelLinReg
 
+class MCTS(object):
+
+    @staticmethod
+    def run():
+        """Monte Carlo Tree Search
+        """
+
+        bk = Simulator.bk
+        model = RelLinReg()
+        episode = Simulator.backward_episode()
+        print (episode)
+
 class AVI(object):
 
     @staticmethod
@@ -23,7 +35,7 @@ class AVI(object):
             facts = []
             examples = {}
             target = 'v'
-            episode = Simulator.backward_episode() #s_number = n)
+            episode = Simulator.backward_episode()
             reverse_episode = episode[::-1]
             goal = reverse_episode[0][0]
             facts += goal.facts()
@@ -43,12 +55,9 @@ class AVI(object):
                     v_next = AVI.approx_value(model,reverse_episode[j-1][0])
                     examples['v(s'+str(reverse_episode[j][0].n)+')'] = -1 + (discount * v_next)
                 
-            #n = len(examples) + len(episode) - 1
-            #print (examples)
             model.learn(facts,examples,bk,'v')
-            #print (n)
 
-AVI.run()
+MCTS.run()
         
         
         
