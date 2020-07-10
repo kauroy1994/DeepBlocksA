@@ -185,6 +185,12 @@ class Simulator(object):
     """to simulate the world
     """
 
+    val_bk = {'v': ['on(+state,+block,-block)',
+                    'on(+state,-block,+block)',
+                    'clear(+state,+block)',
+                    'table(+state,+block)',
+                    'v(+state)']}
+
     bk = {'stack': ['on(+state,+block,-block)',
                     'on(+state,-block,+block)',
                     'clear(+state,+block)',
