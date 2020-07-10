@@ -107,6 +107,23 @@ class Blocks(object):
 
 
         return random_action
+
+    def action_pred(self,action):
+        """returns predicate form of action
+        """
+
+        if action[0] == 1:
+            block_i = self.state[action[1]][0]
+            block_j = self.state[action[2]][0]
+            return "stack(s"+str(self.n)+","+block_i+","+block_j+")"
+
+        elif action[0] == 0:
+            block = self.state[action[1]][0]
+            return "unstack(s"+str(self.n)+","+block+")"
+
+        elif action[0] == 2:
+            return "noop(s"+str(self.n)+")"
+            
             
     def act(self,action):
         """[1,i,j]: stacks block from i to j
@@ -171,7 +188,9 @@ class Simulator(object):
           'on(+state,-block,+block)',
           'clear(+state,+block)',
           'table(+state,+block)',
-          'v(+state)']
+          'stack(+state,+block,+block)',
+          'unstack(+state,+block)',
+          'noop(+state)']
 
     @staticmethod
     def policy(s_prev,s):
@@ -208,7 +227,8 @@ class Simulator(object):
                     s_prev = deepcopy(s)
                     s = s.act(action)
                     forward_action = Simulator.policy(s,s_prev)
-                    episode = [[deepcopy(s),deepcopy(forward_action)]] + episode
+                    forward_action_pred = s.action_pred(forward_action)
+                    episode = [[deepcopy(s),deepcopy(forward_action_pred)]] + episode
                     break
         return (episode)
             
