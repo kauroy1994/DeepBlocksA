@@ -158,6 +158,7 @@ class PhiMap(object):
 
         #assign clause targets
         PhiMap.target = target
+        
 
         for d in range(PhiMap.max_degree):
 
