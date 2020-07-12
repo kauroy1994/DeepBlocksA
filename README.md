@@ -2,7 +2,7 @@
 
 Experiments on [DeepCubeA](http://deepcube.igb.uci.edu) algorithm and policy gradient methods applied to Blocks World, later to be applied to real world application simulations.
 
-Monte Carlo Tree Search used for value function approximation.
+Monte Carlo Sampling used for value function approximation.
 
 Based on papers:
 
