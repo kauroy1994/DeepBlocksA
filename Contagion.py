@@ -33,14 +33,22 @@ class Contagion(object):
         #record immune persons
         self.immune = [0 for i in range(pop)]
 
+        #record where people shop
+        self.shops = ['shop1' for i in range(int(pop/2))]
+        self.shops += ['shop2' for i in range(int(pop/2),pop)]
+
+        #record where people work, everybody works
+        self.works = ['work1' for i in range(int(pop/2))]
+        self.works += ['work2' for i in range(int(pop/2),pop)]
+
         #two tracks to work that persons take
-        #each track has a residential complex with 5 houses
+        #each track has a residential complex with houses containing half the population
         #each track has a shop that makes 1$ per person that travels
         #each person working contributes $1 to GDP
-        self.tracks = {'t1': {'res1': ['h'+str(i) for i in range(5)],
+        self.tracks = {'t1': {'res1': ['h'+str(i) for i in range(int(pop/2))],
                               'shop1': 1,
                               'work1': 1},
-                       't2': {'res2': ['h'+str(i) for i in range(5,10)],
+                       't2': {'res2': ['h'+str(i) for i in range(int(pop/2),pop)],
                               'shop2': 1,
                               'work2': 1}}
 
@@ -48,7 +56,7 @@ class Contagion(object):
         
         #each person assigned randomly to 1 of 10 houses,
         #that they live in
-        self.houses = [choice(range(0,10)) for i in range(pop)]
+        self.houses = [choice(range(0,pop)) for i in range(pop)]
 
         #record if hospitalized or in isolation
         self.out = [0 for i in range(pop)]
@@ -83,7 +91,7 @@ class Contagion(object):
                         self.isolated[i] = 1
                         self.out[i] = 1
                         
-        #those missed in testing will spread contagion
+        #those missed in testing will spread contagion in their house
         for i in range(n_persons):
             if self.ill[i]:
                 house = self.houses[i]
@@ -99,6 +107,41 @@ class Contagion(object):
                                 continue
                             if house == house_j:
                                 self.ill[j] = 1
+
+        #those missed in testing will spread contagion at shopping
+        for i in range(n_persons):
+            if self.ill[i]:
+                shop = self.shops[i]
+                if self.out[i]:
+                    continue
+                else:
+                    for j in range(n_persons):
+                        if i == j:
+                            continue
+                        else:
+                            shop_j = self.shops[j]
+                            if self.out[j] or self.ill[j]:
+                                continue
+                            if shop == shop_j:
+                                self.ill[j] = 1
+                                
+        #those missed in testing will spread contagion at work
+        for i in range(n_persons):
+            if self.ill[i]:
+                work = self.works[i]
+                if self.out[i]:
+                    continue
+                else:
+                    for j in range(n_persons):
+                        if i == j:
+                            continue
+                        else:
+                            work_j = self.works[j]
+                            if self.out[j] or self.ill[j]:
+                                continue
+                            if work == work_j:
+                                self.ill[j] = 1
+                            
                     
            
     def facts(self):
@@ -128,8 +171,10 @@ class Contagion(object):
             facts.append("pin(s"+str(self.n)+",p"+str(i)+",h"+str(self.houses[i])+")")
 
             #person is ill
+            '''never observe who is ill
             if self.ill[i]:
                 facts.append("ill(s"+str(self.n)+",p"+str(i)+")")
+            '''
         for track in self.tracks:
             if track not in self.locked:
 
@@ -182,7 +227,6 @@ class Contagion(object):
 
 
 #===============TEST FUNCTION============
-'''
+
 city = Contagion()            
-'''
         
