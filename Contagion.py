@@ -16,6 +16,9 @@ class Contagion(object):
            TODO: Create state econ reward, on shop and work output
         """
 
+        self.KG = []
+        self.test_r = test_r
+
         self.n = n
 
         #pop number of persons
@@ -63,7 +66,9 @@ class Contagion(object):
         
         #one hospitals with max capacity 3
         self.hospitals = {'hos0' : [False for i in range(3)]}
-        self.hospitalize_and_transmit(test_r)
+        self.hospitalize_and_transmit(self.test_r)
+
+        self.create_KG()
 
 
     def hospitalize_and_transmit(self,testing_rate):
@@ -141,8 +146,93 @@ class Contagion(object):
                                 continue
                             if work == work_j:
                                 self.ill[j] = 1
+
+    def create_KG(self):
+        """creates Knowledge Graph
+        """
+        
+        #establishments on same track (use combinations later)
+        facts = ["same_track(res1,shop1)",
+                 "same_track(shop1,work1)",
+                 "same_track(res1,work1)",
+                 "same_track(res2,shop2)",
+                 "same_track(shop2,work2)",
+                 "same_track(res2,work2)"]
+
+        n_persons = len(self.persons)
+        
+        for i in range(n_persons):
+
+            #person in house
+            facts.append("stays_in(per"+str(i+1)+",house"+str(self.houses[i]+1)+")")
+
+            #person is ill
+            '''never observe who is ill
+            if self.ill[i]:
+                facts.append("ill(s"+str(self.n)+",p"+str(i)+")")
+            '''
+        for track in self.tracks:
+            if track not in self.locked:
+
+                #track is open
+                facts.append("open(track"+track.split('t')[1]+")")
+            for est in self.tracks[track]:
+                if 'res' in est:
+                    if est not in self.locked:
+
+                        #establishment (residence) is open
+                        facts.append("open("+est+")")
+
+                    #establishment (residence) on particular track
+                    facts.append("on("+est+",track"+track.split('t')[1]+")")
+                    for house in self.tracks[track][est]:
+                        if house not in self.locked:
+
+                            #house is open
+                            facts.append("open(house"+str(int(house.split('h')[1])+1)+")")
+
+                        #house is in this establishment (residence)
+                        facts.append("part_of(house"+str(int(house.split('h')[1])+1)+","+est+")")
+                elif 'shop' in est:
+                    if est not in self.locked:
+
+                        #establishment (shop) is open
+                        facts.append("open("+est+")")
+
+                    #establishment (shop) on particular track
+                    facts.append("on("+est+",track"+track.split('t')[1]+")")
+                elif 'work' in est:
+                    if est not in self.locked:
+
+                        #establishment (work) is open
+                        facts.append("open("+est+")")
+
+                    #establishment (work) on particular track
+                    facts.append("on("+est+",track"+track.split('t')[1]+")")
+
+
+        for i in range(n_persons):
+            if self.hospitalized[i]:
+                facts.append("hospitalized(per"+str(i+1)+")")
+
+        for i in range(n_persons):
+            if self.isolated[i]:
+                facts.append("quarantined(per"+str(i+1)+")")
+
+        self.KG = facts
+        
                             
-                    
+    def __repr__(self):
+        """call to print or str
+           returns this
+        """
+
+        out = "State number: "+str(self.n)+"\n"
+
+        for fact in self.KG:
+            out += fact + "\n"
+
+        return out
            
     def facts(self):
         """returns predicate rep
@@ -180,7 +270,7 @@ class Contagion(object):
 
                 #track is open
                 facts.append("topen(s"+str(self.n)+","+track+")")
-            for est in track:
+            for est in self.tracks[track]:
                 if 'res' in est:
                     if est not in self.locked:
 
@@ -189,7 +279,7 @@ class Contagion(object):
 
                     #establishment (residence) on particular track
                     facts.append("ron(s"+str(self.n)+","+est+","+track+")")
-                    for house in track[est]:
+                    for house in self.tracks[track][est]:
                         if house not in self.locked:
 
                             #house is open
@@ -214,19 +304,23 @@ class Contagion(object):
                     #establishment (work) on particular track
                     facts.append("won(s"+str(self.n)+","+est+","+track+")")
 
-        for hospital in self.hospitals:
-            for person in self.hospitals[hospital]:
-                if not person:
-                    continue
-                else:
+        for i in range(n_persons):
+            if self.hospitalized[i]:
+                
+                #person is hospitalized
+                facts.append("ph(s"+str(self.n)+",p"+str(i)+")")
 
-                    #person is hospitalized
-                    facts.append("ph(s"+str(self.n)+",p"+str(person)+")")
+        for i in range(n_persons):
+            if self.isolated[i]:
+
+                #person is quarantined
+                facts.append("q(s"+str(self.n)+",p"+str(i)+")")
 
         return facts
 
 
 #===============TEST FUNCTION============
 '''
-city = Contagion()            
-'''        
+s0 = Contagion()
+print (s0)
+'''
