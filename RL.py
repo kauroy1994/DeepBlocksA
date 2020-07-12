@@ -2,7 +2,7 @@ from Blocks import Simulator
 from ML import RepLearn
 from tqdm import tqdm
 
-class MCTS(object):
+class MCS(object):
 
     @staticmethod
     def learn_representation(bk,iters = 2):
@@ -76,7 +76,7 @@ class MCTS(object):
             model.learn(features,facts,examples,bk[target],target)
             models[target] = model
 
-MCTS.run()
+MCS.run()
         
         
         
