@@ -227,6 +227,6 @@ class Contagion(object):
 
 
 #===============TEST FUNCTION============
-
+'''
 city = Contagion()            
-        
+'''        
