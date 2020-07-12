@@ -68,7 +68,7 @@ class Contagion(object):
         self.hospitals = {'hos0' : [False for i in range(3)]}
         self.hospitalize_and_transmit(self.test_r)
 
-        self.create_KG()
+        self.create_KG(dot = True)
 
 
     def hospitalize_and_transmit(self,testing_rate):
@@ -147,7 +147,7 @@ class Contagion(object):
                             if work == work_j:
                                 self.ill[j] = 1
 
-    def create_KG(self):
+    def create_KG(self,dot = False):
         """creates Knowledge Graph
         """
         
@@ -220,7 +220,39 @@ class Contagion(object):
                 facts.append("quarantined(per"+str(i+1)+")")
 
         self.KG = facts
-        
+
+        #write to dot file if illustration required
+        if dot:
+
+            with open('KG.dot','a') as fp:
+                fp.write("digraph G {" + "\n")
+                fp.write("rankdir = LR"+"\n")
+
+            lines_to_add = []
+            for fact in self.KG:
+                if len(fact.split('(')[1].split(',')) != 2:
+                    attr = fact.split('(')[0]
+                    if attr not in lines_to_add:
+                        lines_to_add.append(attr)
+                    obj = fact.split('(')[1][:-1]
+                    if obj+"[shape=box]" not in lines_to_add:
+                        lines_to_add.append(obj+"[shape=box]")
+                    lines_to_add.append(obj+"->"+attr)
+                    continue
+                rel = fact.split('(')[0]
+                obj = fact.split('(')[1].split(',')[0]
+                subj = fact.split('(')[1].split(',')[1][:-1]
+                if obj+"[shape=box]" not in lines_to_add:
+                    lines_to_add.append(obj+"[shape=box]")
+                if subj+"[shape=box]" not in lines_to_add:
+                    lines_to_add.append(obj+"[shape=box]")
+            
+                lines_to_add.append(obj+"->"+subj+"[label="+rel+"]")
+
+            with open('KG.dot','a') as fp:
+                for line in lines_to_add:
+                    fp.write(line+"\n")
+                fp.write("}")
                             
     def __repr__(self):
         """call to print or str
@@ -322,5 +354,5 @@ class Contagion(object):
 #===============TEST FUNCTION============
 '''
 s0 = Contagion()
-print (s0)
+#print (s0)
 '''
