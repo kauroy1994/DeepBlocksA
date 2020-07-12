@@ -44,7 +44,7 @@ class MCS(object):
         """
 
         bk = Simulator.bk
-        features = MCTS.learn_representation(bk)
+        features = MCS.learn_representation(bk)
         print (features)
         exit()
         targets = list(bk.keys())
