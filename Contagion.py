@@ -33,9 +33,6 @@ class Contagion(object):
         #record hospitalized persons
         self.hospitalized = [0 for i in range(pop)]
 
-        #record immune persons
-        self.immune = [0 for i in range(pop)]
-
         #record where people shop
         self.shops = ['shop1' for i in range(int(pop/2))]
         self.shops += ['shop2' for i in range(int(pop/2),pop)]
@@ -61,13 +58,12 @@ class Contagion(object):
         #that they live in
         self.houses = [choice(range(0,pop)) for i in range(pop)]
 
-        #record if hospitalized or in isolation
+        #record if hospitalized or in isolation or immune
         self.out = [0 for i in range(pop)]
         
         #one hospitals with max capacity 3
         self.hospitals = {'hos0' : [False for i in range(3)]}
         self.hospitalize_and_transmit(self.test_r)
-
         self.create_KG(dot = True)
 
 
@@ -146,6 +142,21 @@ class Contagion(object):
                                 continue
                             if work == work_j:
                                 self.ill[j] = 1
+
+        #release a third of patients from hospital
+        for hospital in self.hospitals:
+            n_hospitalized = len(self.hospitals[hospital])
+            for i in range(n_hospitalized):
+                person = self.hospitals[hospital][i]
+                if not person:
+                    continue
+                else:
+                    if random() < 0.3:
+                        self.hospitals[hospital][i] = False
+                        self.hospitalized[person] = 0
+                        #self.out still 1 as person recovered,
+                        #and assumed immune
+                        
 
     def create_KG(self,dot = False):
         """creates Knowledge Graph
@@ -352,7 +363,9 @@ class Contagion(object):
 
 
 #===============TEST FUNCTION============
+
 '''
 s0 = Contagion()
-#print (s0)
+print (s0)
 '''
+
