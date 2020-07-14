@@ -63,6 +63,18 @@ class Contagion(object):
         
         #one hospitals with max capacity 3
         self.hospitals = {'hos0' : [False for i in range(3)]}
+
+        locs = list(self.tracks.keys())
+        for track in self.tracks:
+            locs += list(self.tracks[track].keys())
+            for est in self.tracks[track]:
+                if "res" in est:
+                    locs += self.tracks[track][est]
+
+        #set locked to 0 for all locations
+        for loc in locs:
+            self.locked[loc] = 0
+        
         self.hospitalize_and_transmit(self.test_r)
         self.create_KG(dot = True)
 
@@ -96,7 +108,10 @@ class Contagion(object):
         for i in range(n_persons):
             if self.ill[i]:
                 house = self.houses[i]
-                if self.out[i]:
+                track = 't1'
+                if i in range(int(n_persons/2),int(n_persons)):
+                    track = 't2'
+                if self.out[i] or self.locked['h'+str(house)] or self.locked[track]:
                     continue
                 else:
                     for j in range(n_persons):
@@ -104,7 +119,10 @@ class Contagion(object):
                             continue
                         else:
                             house_j = self.houses[j]
-                            if self.out[j] or self.ill[j]:
+                            track_j = 't1'
+                            if j in range(int(n_persons/2),int(n_persons)):
+                                track_j = 't2'
+                            if self.out[j] or self.ill[j] or self.locked['h'+str(house_j)] or self.locked[track_j]:
                                 continue
                             if house == house_j:
                                 self.ill[j] = 1
@@ -113,7 +131,10 @@ class Contagion(object):
         for i in range(n_persons):
             if self.ill[i]:
                 shop = self.shops[i]
-                if self.out[i]:
+                track = 't1'
+                if i in range(int(n_persons/2),int(n_persons)):
+                    track = 't2'
+                if self.out[i] or self.locked[shop] or self.locked[track]:
                     continue
                 else:
                     for j in range(n_persons):
@@ -121,7 +142,10 @@ class Contagion(object):
                             continue
                         else:
                             shop_j = self.shops[j]
-                            if self.out[j] or self.ill[j]:
+                            track_j = 't1'
+                            if j in range(int(n_persons/2),int(n_persons)):
+                                track_j = 't2'
+                            if self.out[j] or self.ill[j] or self.locked[shop_j] or self.locked[track_j]:
                                 continue
                             if shop == shop_j:
                                 self.ill[j] = 1
@@ -130,7 +154,10 @@ class Contagion(object):
         for i in range(n_persons):
             if self.ill[i]:
                 work = self.works[i]
-                if self.out[i]:
+                track = 't1'
+                if i in range(int(n_persons/2),int(n_persons)):
+                    track = 't2'
+                if self.out[i] or self.locked[work] or self.locked[track]:
                     continue
                 else:
                     for j in range(n_persons):
@@ -138,7 +165,10 @@ class Contagion(object):
                             continue
                         else:
                             work_j = self.works[j]
-                            if self.out[j] or self.ill[j]:
+                            track_j = 't1'
+                            if j in range(int(n_persons/2),int(n_persons)):
+                                track_j = 't2'
+                            if self.out[j] or self.ill[j] or self.locked[work_j] or self.locked[track_j]:
                                 continue
                             if work == work_j:
                                 self.ill[j] = 1
@@ -361,11 +391,53 @@ class Contagion(object):
 
         return facts
 
+    def random(self):
+        """returns random valid action
+           action can be lockdown shops,
+           work, residences, houses,
+           entire track or incr tests
+           lock : [0,<loc>]
+           unlock: [1, <loc>]
+           incr test: [2]
+        """
+
+        action = [choice([0,1,2])]
+        
+        locs = list(self.tracks.keys())
+        for track in self.tracks:
+            locs += list(self.tracks[track].keys())
+            for est in self.tracks[track]:
+                if "res" in est:
+                    locs += self.tracks[track][est]
+                    
+        if action[0] == 0:
+            return (action + [choice(locs)])
+
+        elif action[0] == 1:
+            return (action + [choice(locs)])
+
+        elif action[0] == 2:
+            return action
+
+    def action_pred(self,action):
+        """returns predicate form of action
+        """
+
+        if action[0] == 0:
+            return "lockdown(s"+str(self.n)+","+action[1]+")"
+
+        elif action[0] == 1:
+            return "unlock(s"+str(self.n)+","+action[1]+")"
+
+        elif action[0] == 2:
+            return "incr_test(s"+str(self.n)+")"
+
+
 
 #===============TEST FUNCTION============
 
 '''
 s0 = Contagion()
+print (s0.locked)
 print (s0)
 '''
-
