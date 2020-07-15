@@ -16,7 +16,6 @@ class Contagion(object):
            TODO: Create state econ reward, on shop and work output
         """
 
-        self.KG = []
         self.test_r = test_r
 
         self.n = n
@@ -76,7 +75,7 @@ class Contagion(object):
             self.locked[loc] = 0
         
         self.hospitalize_and_transmit(self.test_r)
-        self.create_KG(dot = True)
+        self.create_KG(dot = False)
 
 
     def hospitalize_and_transmit(self,testing_rate):
@@ -191,6 +190,8 @@ class Contagion(object):
     def create_KG(self,dot = False):
         """creates Knowledge Graph
         """
+
+        self.KG = []
         
         #establishments on same track (use combinations later)
         facts = ["same_track(res1,shop1)",
@@ -213,13 +214,13 @@ class Contagion(object):
                 facts.append("ill(s"+str(self.n)+",p"+str(i)+")")
             '''
         for track in self.tracks:
-            if track not in self.locked:
+            if not self.locked[track]:
 
                 #track is open
                 facts.append("open(track"+track.split('t')[1]+")")
             for est in self.tracks[track]:
                 if 'res' in est:
-                    if est not in self.locked:
+                    if not self.locked[est]:
 
                         #establishment (residence) is open
                         facts.append("open("+est+")")
@@ -227,7 +228,7 @@ class Contagion(object):
                     #establishment (residence) on particular track
                     facts.append("on("+est+",track"+track.split('t')[1]+")")
                     for house in self.tracks[track][est]:
-                        if house not in self.locked:
+                        if not self.locked[house]:
 
                             #house is open
                             facts.append("open(house"+str(int(house.split('h')[1])+1)+")")
@@ -235,7 +236,7 @@ class Contagion(object):
                         #house is in this establishment (residence)
                         facts.append("part_of(house"+str(int(house.split('h')[1])+1)+","+est+")")
                 elif 'shop' in est:
-                    if est not in self.locked:
+                    if not self.locked[est]:
 
                         #establishment (shop) is open
                         facts.append("open("+est+")")
@@ -243,7 +244,7 @@ class Contagion(object):
                     #establishment (shop) on particular track
                     facts.append("on("+est+",track"+track.split('t')[1]+")")
                 elif 'work' in est:
-                    if est not in self.locked:
+                    if not self.locked[est]:
 
                         #establishment (work) is open
                         facts.append("open("+est+")")
@@ -265,7 +266,7 @@ class Contagion(object):
         #write to dot file if illustration required
         if dot:
 
-            with open('KG.dot','a') as fp:
+            with open('KG'+str(self.n)+'.dot','a') as fp:
                 fp.write("digraph G {" + "\n")
                 fp.write("rankdir = LR"+"\n")
 
@@ -290,7 +291,7 @@ class Contagion(object):
             
                 lines_to_add.append(obj+"->"+subj+"[label="+rel+"]")
 
-            with open('KG.dot','a') as fp:
+            with open('KG'+str(self.n)+'.dot','a') as fp:
                 for line in lines_to_add:
                     fp.write(line+"\n")
                 fp.write("}")
@@ -339,13 +340,13 @@ class Contagion(object):
                 facts.append("ill(s"+str(self.n)+",p"+str(i)+")")
             '''
         for track in self.tracks:
-            if track not in self.locked:
+            if not self.locked[track]:
 
                 #track is open
                 facts.append("topen(s"+str(self.n)+","+track+")")
             for est in self.tracks[track]:
                 if 'res' in est:
-                    if est not in self.locked:
+                    if not self.locked[est]:
 
                         #establishment (residence) is open
                         facts.append("ropen(s"+str(self.n)+","+est+")")
@@ -353,7 +354,7 @@ class Contagion(object):
                     #establishment (residence) on particular track
                     facts.append("ron(s"+str(self.n)+","+est+","+track+")")
                     for house in self.tracks[track][est]:
-                        if house not in self.locked:
+                        if not self.locked[house]:
 
                             #house is open
                             facts.append("hopen(s"+str(self.n)+","+house+")")
@@ -361,7 +362,7 @@ class Contagion(object):
                         #house is in this establishment (residence)
                         facts.append("hin(s"+str(self.n)+","+house+","+est+")")
                 elif 'shop' in est:
-                    if est not in self.locked:
+                    if not self.locked[est]:
 
                         #establishment (shop) is open
                         facts.append("sopen(s"+str(self.n)+","+est+")")
@@ -369,7 +370,7 @@ class Contagion(object):
                     #establishment (shop) on particular track
                     facts.append("son(s"+str(self.n)+","+est+","+track+")")
                 elif 'work' in est:
-                    if est not in self.locked:
+                    if not self.locked[est]:
 
                         #establishment (work) is open
                         facts.append("wopen(s"+str(self.n)+","+est+")")
@@ -399,9 +400,10 @@ class Contagion(object):
            lock : [0,<loc>]
            unlock: [1, <loc>]
            incr test: [2]
+           noop: [3]
         """
 
-        action = [choice([0,1,2])]
+        action = [choice([0,1,2,3])]
         
         locs = list(self.tracks.keys())
         for track in self.tracks:
@@ -416,7 +418,7 @@ class Contagion(object):
         elif action[0] == 1:
             return (action + [choice(locs)])
 
-        elif action[0] == 2:
+        elif action[0] == 2 or action[0] == 3:
             return action
 
     def action_pred(self,action):
@@ -432,12 +434,54 @@ class Contagion(object):
         elif action[0] == 2:
             return "incr_test(s"+str(self.n)+")"
 
+        elif action[0] == 3:
+            return "noop(s"+str(self.n)+")"
 
+    def act(self,action):
+        """[0,<loc>]: locksdown location
+           [1,<loc>]: unlocks location
+           [2]: increases test rate by 10%
+           [3]: Noop
+        """
+
+        next_state = deepcopy(self)
+        next_state.n = self.n + 1
+
+        if action[0] == 0:
+
+            if next_state.locked[action[1]]:
+                #invalid action
+                return False
+
+            loc = action[1]
+            next_state.locked[loc] = 1
+
+        elif action[0] == 1:
+
+            if not next_state.locked[action[1]]:
+                #invalid action
+                return False
+
+            loc = action[1]
+            next_state.locked[loc] = 0
+
+        elif action[0] == 2:
+            if next_state.test_r >= 0.9:
+                #invalid action
+                return False
+
+            next_state.test_r += 0.1
+
+        next_state.hospitalize_and_transmit(self.test_r)
+        next_state.create_KG(dot = True)
+        
+        return next_state
 
 #===============TEST FUNCTION============
-
 '''
 s0 = Contagion()
-print (s0.locked)
-print (s0)
+action = s0.random()
+print (action)
+print (s0.action_pred(action))
+s1 = s0.act(action)
 '''
