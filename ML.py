@@ -87,8 +87,10 @@ class DN(object):
             self.feed_forward(x_i,y_i)
 
 #====== TESTCODE =============
+'''
 clf = DN()
 X,Y = [[1,2],[1,3]],[[5],[7]]
 clf.fit(X,Y)
+'''
 
         
