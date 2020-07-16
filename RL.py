@@ -1,5 +1,5 @@
 from Blocks import Simulator
-from ML import RepLearn
+from ML import RepLearn,DN
 from tqdm import tqdm
 
 class MCS(object):
@@ -51,7 +51,7 @@ class MCS(object):
         models = {}
         for target in targets:
             print ("target:",target)
-            model = RelLinReg()
+            model = DN(features[target])
             n = 0
             for i in range(iters):
                 facts = []
@@ -73,7 +73,7 @@ class MCS(object):
                     if episode[j][1].split('(')[0] == target:
                         examples[episode[j][1]] = sum_reward
             n = 2 * len(examples) - 1
-            model.learn(features,facts,examples,bk[target],target)
+            model.learn(facts,examples,bk[target],target)
             models[target] = model
 
 MCS.run()
