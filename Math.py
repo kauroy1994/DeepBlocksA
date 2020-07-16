@@ -53,6 +53,65 @@ class Matrix():
         
         return False
 
+    def __pow__(self,p):
+        """power function
+        """
+        
+        x = self
+        for i in range(p-1):
+            x = x * self
+
+        return x
+
+    def __matmul__(self,other):
+        """point wise product
+        """
+
+        n1,n2 = len(self.array),len(other.array)
+        m1,m2 = len(self.array[0]),len(other.array[0])
+
+        if n1 != n2 or m1 != m2:
+            print ('Invalid op')
+            exit()
+
+        res = [[0 for j in range(m1)] for i in range(n1)]
+        for i in range(n1):
+            for j in range(m1):
+                res[i][j] = self.array[i][j] * other.array[i][j]
+
+        return Matrix(res)
+        
+
+    def grad(self,a = 'sigmoid'):
+        """computes gradient to every element
+        """
+
+        n = len(self.array)
+        m = len(self.array[0])
+        I = Matrix([[1 for j in range(m)] for i in range(n)])
+        
+        if a == 'sigmoid':
+            return self.sigmoid() @ (I - self.sigmoid())
+
+    def __sub__(self,other):
+        """adds self with other
+        """
+
+        n1,n2 = len(self.array),len(other.array)
+        m1,m2 = len(self.array[0]),len(other.array[0])
+
+        if n1 != n2 or m1 != m2:
+            print ('Invalid op')
+            exit()
+
+        res = [[0 for j in range(m1)] for i in range(n1)]
+        for i in range(n1):
+            for j in range(m1):
+                res[i][j] = self.array[i][j] - other.array[i][j]
+
+        return Matrix(res)
+    
+
     def __add__(self,other):
         """adds self with other
         """
@@ -64,9 +123,9 @@ class Matrix():
             print ('Invalid op')
             exit()
 
-        res = [[0 for j in range(n2)] for i in range(n1)]
+        res = [[0 for j in range(m1)] for i in range(n1)]
         for i in range(n1):
-            for j in range(n2):
+            for j in range(m1):
                 res[i][j] = self.array[i][j] + other.array[i][j]
 
         return Matrix(res)
@@ -105,7 +164,8 @@ class Matrix():
         n1,n2 = len(self.array),len(other.array)
         m1,m2 = len(self.array[0]),len(other.array[0])
 
-        if n2 != m1:
+        if m1 != n2:
+            print (m1,n2)
             print ('Invalid op')
             exit()
 
