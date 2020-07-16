@@ -1,3 +1,16 @@
+from math import exp
+
+class Activation():
+    """implements different activations
+    """
+
+    @staticmethod
+    def sigmoid(x):
+        """sigmoid activation
+        """
+
+        return (exp(x)/float(1+exp(x)))
+
 class Matrix():
     """implements matrix ops
     """
@@ -8,6 +21,23 @@ class Matrix():
         """
 
         self.array = array
+
+    def sigmoid(self):
+        """applies sigmoid function
+           to all elements
+        """
+
+        n = len(self.array)
+        m = len(self.array[0])
+
+        res = [[0 for j in range(m)] for i in range(n)]
+
+        for i in range(n):
+            for j in range(m):
+                res[i][j] = Activation.sigmoid(self.array[i][j])
+
+        return Matrix(res)
+
 
     def __repr__(self):
         """call to print or
@@ -41,7 +71,24 @@ class Matrix():
 
         return Matrix(res)
 
+    def T(self):
+        """Transpose of matrix
+        """
+
+        n = len(self.array)
+        m = len(self.array[0])
+
+        res = [[0 for j in range(n)] for i in range(m)]
+
+        for i in range(m):
+            for j in range(n):
+                res[i][j] = self.array[j][i]
+
+        return Matrix(res)
+
     def dim(self):
+        """returns rows and cols
+        """
 
         return ((len(self.array),len(self.array[0])))
 
