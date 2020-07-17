@@ -112,6 +112,8 @@ class DN(object):
             self.back_prop(y_i)
 
 #====== TESTCODE =============
+'''
 clf = DN()
 X,Y = [[1,2],[1,3]],[[5],[7]]
 clf.fit(X,Y)
+'''
