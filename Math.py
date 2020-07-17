@@ -93,6 +93,9 @@ class Matrix():
         if a == 'sigmoid':
             return self.sigmoid() @ (I - self.sigmoid())
 
+        elif a == 'lin': #linear activation
+            return Matrix([[1]])
+
     def __sub__(self,other):
         """adds self with other
         """
