@@ -31,7 +31,7 @@ class DN(object):
         self.delta = []
         self.Ws = []
 
-    def feed_forward(self,x_i,y_i):
+    def feed_forward(self,x_i):
         """network forward pass
         """
 
@@ -48,6 +48,12 @@ class DN(object):
             self.network[i] = self.Ws[i-1].T()*self.network[i-1]
             self.network[i] = self.network[i].sigmoid()
 
+    def compute_deltas(self,y_i):
+        """computes deltas for backprop
+        """
+
+        n_params = len(self.params)
+        
         for i in range(n_params-1):
             self.delta.append([[0] for n in range(self.params[i])])
         self.delta.append([[0] for i in range(self.params[-1])])
@@ -60,13 +66,15 @@ class DN(object):
         for i in backward_range:
             self.delta[i] = (self.network[i].grad()) @ (self.Ws[i] * self.delta[i+1])
 
-    def back_prop(self):
+
+    def back_prop(self,y_i):
         """propagates chain rule grads
            through network structure
            o/p layer to i/p
         """
 
         n_params = len(self.params)
+        self.compute_deltas(y_i)
 
         #compute gradients
         
@@ -100,12 +108,10 @@ class DN(object):
         for i in range(N):
             x_i = X[i]+[1] #bias
             y_i = Y[i]
-            self.feed_forward(x_i,y_i)
-            self.back_prop()
+            self.feed_forward(x_i)
+            self.back_prop(y_i)
 
 #====== TESTCODE =============
-'''
 clf = DN()
 X,Y = [[1,2],[1,3]],[[5],[7]]
 clf.fit(X,Y)
-'''
