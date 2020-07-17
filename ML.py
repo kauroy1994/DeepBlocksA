@@ -74,7 +74,7 @@ class DN(object):
             n,m = self.Ws[i-1].dim()[0],self.Ws[i-1].dim()[1]
             lr = Matrix([[0.001 for j in range(m)] for i in range(n)])
             grad = self.network[i-1] * self.delta[i].T()
-            self.Ws[i-1] += lr @ grad
+            self.Ws[i-1] -= lr @ grad
         
         
     def learn(facts,examples,bk,target):
