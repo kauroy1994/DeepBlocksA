@@ -141,9 +141,9 @@ class DN(object):
 
 #====== TESTCODE ==============
 '''
-clf = DN(layers=[])#,reg='l1')
-X,Y = [[1],[3]],[[2],[5]]
-clf.fit(X,Y,iters=100,lr = 0.01)
+clf = DN(layers=[10],act='relu')#,reg='l2')
+X,Y = [[1],[2]],[[2],[4]]
+clf.fit(X,Y,iters=200,lr = 0.01)
 predictions = clf.predict(X)
 print ([float(m.array[0][0]) for m in predictions])
 '''
