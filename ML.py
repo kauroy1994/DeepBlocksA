@@ -20,7 +20,7 @@ class DN(object):
     """implements ANN for regression
     """
 
-    def __init__(self,features = [],layers = [100],regularizer = "l2"):
+    def __init__(self,features = [],layers = [100],regularizer = "l2",act = 'sigmoid'):
         """initialize hyper parameters,
            regularizer: l1/l2
         """
@@ -30,6 +30,7 @@ class DN(object):
         self.network = []
         self.delta = []
         self.Ws = []
+        self.act = act
 
     def feed_forward(self,x_i):
         """network forward pass
@@ -47,11 +48,14 @@ class DN(object):
         for i in range(1,n_params):
             self.network[i] = self.Ws[i-1].T()*self.network[i-1]
             if i != n_params-1:
-                self.network[i] = self.network[i].sigmoid()
+                if self.act == 'sigmoid':
+                    self.network[i] = self.network[i].sigmoid()
+                elif self.act == 'relu':
+                    self.network[i] = self.network[i].relu()
             else:
                 self.network[i] = self.network[i]
 
-    def compute_deltas(self,y_i):
+    def compute_deltas(self,y_i,error_grad):
         """computes deltas for backprop
         """
 
@@ -63,20 +67,19 @@ class DN(object):
 
         #compute deltas
         backward_range = range(1,n_params-1)[::-1]
-        error_grad = (self.network[n_params-1] - Matrix([y_i]))
         self.delta[n_params-1] = (self.network[n_params-1].grad(a='lin') * error_grad)        
         for i in backward_range:
-            self.delta[i] = (self.network[i].grad()) @ (self.Ws[i] * self.delta[i+1])
+            self.delta[i] = (self.network[i].grad(a=self.act)) @ (self.Ws[i] * self.delta[i+1])
 
 
-    def back_prop(self,y_i,r=0.01):
+    def back_prop(self,y_i,e_grad,r=0.01):
         """propagates chain rule grads
            through network structure
            o/p layer to i/p
         """
 
         n_params = len(self.params)
-        self.compute_deltas(y_i)
+        self.compute_deltas(y_i,e_grad)
 
         #compute gradients        
         for i in range(1,n_params):
@@ -103,14 +106,19 @@ class DN(object):
         n_params = len(params)
         
         for i in range(n_params-1):
-            self.Ws.append(Matrix([[0.0 for k in range(params[i+1])] for j in range(params[i])]))
+            self.Ws.append(Matrix([[1.0 for k in range(params[i+1])] for j in range(params[i])]))
             
         for it in range(iters):
+            e_grad = Matrix([[0.0]]) 
             for i in range(N):
                 x_i = X[i]+[1] #bias
                 y_i = Y[i]
                 self.feed_forward(x_i)
-                self.back_prop(y_i,r=lr)
+                #e_grad = (self.network[n_params-1] - Matrix([y_i])), for SGD
+                #self.back_prop(y_i,e_grad,r=lr)
+                e_grad += (self.network[n_params-1] - Matrix([y_i]))
+            e_grad.array[0][0] /= N
+            self.back_prop(y_i,e_grad,r=lr)
 
     def predict(self,X):
         """predicts on points in X
@@ -127,9 +135,9 @@ class DN(object):
 
 #====== TESTCODE ==============
 '''
-clf = DN(layers=[10])
-X,Y = [[i+1] for i in range(10)],[[2*(i+1) + 1] for i in range(10)]
-clf.fit(X,Y,iters=500,lr = 0.0001)
+clf = DN(layers=[])
+X,Y = [[1],[3]],[[2],[5]]
+clf.fit(X,Y,iters=100,lr = 0.01)
 predictions = clf.predict(X)
 print ([float(m.array[0][0]) for m in predictions])
 '''
