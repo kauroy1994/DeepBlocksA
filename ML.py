@@ -20,7 +20,7 @@ class DN(object):
     """implements ANN for regression
     """
 
-    def __init__(self,features = [],layers = [100],regularizer = "l2",act = 'sigmoid'):
+    def __init__(self,features = [],layers = [100],reg = False,act = 'sigmoid'):
         """initialize hyper parameters,
            regularizer: l1/l2
         """
@@ -31,6 +31,7 @@ class DN(object):
         self.delta = []
         self.Ws = []
         self.act = act
+        self.reg = reg
 
     def feed_forward(self,x_i):
         """network forward pass
@@ -85,7 +86,12 @@ class DN(object):
         for i in range(1,n_params):
             n,m = self.Ws[i-1].dim()[0],self.Ws[i-1].dim()[1]
             lr = Matrix([[r for j in range(m)] for i in range(n)])
+            rm = Matrix([[1 for j in range(m)] for i in range(n)])
+            if self.reg == 'l2':
+                rm = Matrix([[2 for j in range(m)] for i in range(n)]) @ self.Ws[i-1]
             grad = self.network[i-1] * self.delta[i].T()
+            if self.reg:
+                grad += rm
             self.Ws[i-1] -= lr @ grad
 
     def learn(facts,examples,bk,target):
@@ -135,7 +141,7 @@ class DN(object):
 
 #====== TESTCODE ==============
 '''
-clf = DN(layers=[])
+clf = DN(layers=[])#,reg='l1')
 X,Y = [[1],[3]],[[2],[5]]
 clf.fit(X,Y,iters=100,lr = 0.01)
 predictions = clf.predict(X)
