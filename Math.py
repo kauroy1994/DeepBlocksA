@@ -80,7 +80,22 @@ class Matrix():
                 res[i][j] = self.array[i][j] * other.array[i][j]
 
         return Matrix(res)
-        
+
+    def relu(self):
+        """performs relu operator
+           max(0,x)
+        """
+
+        n,m = self.dim()[0],self.dim()[1]
+
+        res = [[0 for j in range(m)] for i in range(n)]
+
+        for i in range(n):
+            for j in range(m):
+                if res[i][j] > 0:
+                    res[i][j] = self.array[i][j]
+
+        return Matrix(res)
 
     def grad(self,a = 'sigmoid'):
         """computes gradient to every element
@@ -94,7 +109,15 @@ class Matrix():
             return self.sigmoid() @ (I - self.sigmoid())
 
         elif a == 'lin': #linear activation
-            return Matrix([[1]])
+            return I
+
+        elif a == 'relu': #rectified linear unit
+            grad = [[0 for j in range(m)] for i in range(n)]
+            for i in range(n):
+                for j in range(m):
+                    if self.array[i][j] > 0:
+                        grad[i][j] = 1
+            return Matrix(grad)
 
     def __sub__(self,other):
         """adds self with other
