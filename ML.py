@@ -46,7 +46,10 @@ class DN(object):
         #compute node values
         for i in range(1,n_params):
             self.network[i] = self.Ws[i-1].T()*self.network[i-1]
-            self.network[i] = self.network[i].sigmoid()
+            if i != n_params-1:
+                self.network[i] = self.network[i].sigmoid()
+            else:
+                self.network[i] = self.network[i]
 
     def compute_deltas(self,y_i):
         """computes deltas for backprop
@@ -59,15 +62,14 @@ class DN(object):
         self.delta.append([[0] for i in range(self.params[-1])])
 
         #compute deltas
-        backward_range = range(n_params-1)[::-1]
-        error = (self.network[n_params-1] - Matrix([y_i]))**2
-        self.delta[n_params-1] = (self.network[n_params-1].grad()*error)
-        
+        backward_range = range(1,n_params-1)[::-1]
+        error_grad = (self.network[n_params-1] - Matrix([y_i]))
+        self.delta[n_params-1] = (self.network[n_params-1].grad(a='lin') * error_grad)        
         for i in backward_range:
             self.delta[i] = (self.network[i].grad()) @ (self.Ws[i] * self.delta[i+1])
 
 
-    def back_prop(self,y_i):
+    def back_prop(self,y_i,r=0.01):
         """propagates chain rule grads
            through network structure
            o/p layer to i/p
@@ -76,22 +78,20 @@ class DN(object):
         n_params = len(self.params)
         self.compute_deltas(y_i)
 
-        #compute gradients
-        
+        #compute gradients        
         for i in range(1,n_params):
             n,m = self.Ws[i-1].dim()[0],self.Ws[i-1].dim()[1]
-            lr = Matrix([[0.001 for j in range(m)] for i in range(n)])
+            lr = Matrix([[r for j in range(m)] for i in range(n)])
             grad = self.network[i-1] * self.delta[i].T()
             self.Ws[i-1] -= lr @ grad
-        
-        
+
     def learn(facts,examples,bk,target):
         """to be completed ..
         """
         
         pass
 
-    def fit(self,X,Y):
+    def fit(self,X,Y,iters=100,lr = 0.01):
         """leanrs DN with optimization
            from data
         """
@@ -103,17 +103,33 @@ class DN(object):
         n_params = len(params)
         
         for i in range(n_params-1):
-            self.Ws.append(Matrix([[random() for k in range(params[i+1])] for j in range(params[i])]))
+            self.Ws.append(Matrix([[0.0 for k in range(params[i+1])] for j in range(params[i])]))
+            
+        for it in range(iters):
+            for i in range(N):
+                x_i = X[i]+[1] #bias
+                y_i = Y[i]
+                self.feed_forward(x_i)
+                self.back_prop(y_i,r=lr)
 
+    def predict(self,X):
+        """predicts on points in X
+        """
+
+        N = len(X)
+        predictions = []
         for i in range(N):
-            x_i = X[i]+[1] #bias
-            y_i = Y[i]
+            x_i = X[i] + [1] #bias
             self.feed_forward(x_i)
-            self.back_prop(y_i)
+            predictions.append(self.network[len(self.params)-1])
 
-#====== TESTCODE =============
+        return predictions
+
+#====== TESTCODE ==============
 '''
-clf = DN()
-X,Y = [[1,2],[1,3]],[[5],[7]]
-clf.fit(X,Y)
+clf = DN(layers=[10])
+X,Y = [[i+1] for i in range(10)],[[2*(i+1) + 1] for i in range(10)]
+clf.fit(X,Y,iters=500,lr = 0.0001)
+predictions = clf.predict(X)
+print ([float(m.array[0][0]) for m in predictions])
 '''
