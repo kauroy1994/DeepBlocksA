@@ -92,7 +92,7 @@ class Matrix():
 
         for i in range(n):
             for j in range(m):
-                if res[i][j] > 0:
+                if self.array[i][j] > 0:
                     res[i][j] = self.array[i][j]
 
         return Matrix(res)
