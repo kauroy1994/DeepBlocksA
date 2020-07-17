@@ -477,6 +477,50 @@ class Contagion(object):
         
         return next_state
 
+class Simulator(object):
+    """simulates the contagion spread
+    """
+
+    val_bk = {'v':['same(+state,+res,+shop)',
+                   'same(+state,+res,-shop)',
+                   'same(+state,-res,+shop)',
+                   'same(+state,+shop,+work)',
+                   'same(+state,+shop,-work)',
+                   'same(+state,-shop,+work)',
+                   'same(+state,+res,+work)',
+                   'same(+state,+res,-work)',
+                   'same(+state,-res,+work)',
+                   'pin(+state,+per,+house)',
+                   'pin(+state,+per,-house)',
+                   'pin(+state,-per,+house)',
+                   'topen(+state,+track)',
+                   'topen(+state,-track)',
+                   'ropen(+state,+res)',
+                   'ropen(+state,-res)',
+                   'ron(+state,+res,+track)',
+                   'ron(+state,+res,-track)',
+                   'ron(+state,-res,+track)',
+                   'hopen(+state,+house)',
+                   'hopen(+state,-house)',
+                   'hin(+state,+house,+res)',
+                   'hin(+state,+house,-res)',
+                   'hin(+state,-house,+res)',
+                   'sopen(+state,+shop)',
+                   'sopen(+state,-shop)',
+                   'son(+state,+shop,+track)',
+                   'son(+state,+shop,-track)',
+                   'son(+state,-shop,+track)',
+                   'wopen(+state,+work)',
+                   'wopen(+state,-work)',
+                   'won(+state,+work,+track)',
+                   'won(+state,+work,-track)',
+                   'won(+state,-work,+track)',
+                   'ph(+state,+per)',
+                   'ph(+state,-per)',
+                   'q(+state,+per)',
+                   'q(+state,-per)',
+                   'v(+state)']}
+        
 #===============TEST FUNCTION============
 '''
 s0 = Contagion()
