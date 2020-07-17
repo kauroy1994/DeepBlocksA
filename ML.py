@@ -60,6 +60,22 @@ class DN(object):
         for i in backward_range:
             self.delta[i] = (self.network[i].grad()) @ (self.Ws[i] * self.delta[i+1])
 
+    def back_prop(self):
+        """propagates chain rule grads
+           through network structure
+           o/p layer to i/p
+        """
+
+        n_params = len(self.params)
+
+        #compute gradients
+        
+        for i in range(1,n_params):
+            n,m = self.Ws[i-1].dim()[0],self.Ws[i-1].dim()[1]
+            lr = Matrix([[0.001 for j in range(m)] for i in range(n)])
+            grad = self.network[i-1] * self.delta[i].T()
+            self.Ws[i-1] += lr @ grad
+        
         
     def learn(facts,examples,bk,target):
         """to be completed ..
@@ -85,6 +101,7 @@ class DN(object):
             x_i = X[i]+[1] #bias
             y_i = Y[i]
             self.feed_forward(x_i,y_i)
+            self.back_prop()
 
 #====== TESTCODE =============
 '''
@@ -92,5 +109,3 @@ clf = DN()
 X,Y = [[1,2],[1,3]],[[5],[7]]
 clf.fit(X,Y)
 '''
-
-        
