@@ -38,11 +38,7 @@ class DN(object):
         """
 
         n_params = len(self.params)
-
-        for i in range(n_params-1):
-            self.network.append([[0] for n in range(self.params[i]+1)])
-        self.network.append([[0] for i in range(self.params[-1]+1)])
-        
+        self.network = [False for i in range(n_params)]
         self.network[0] = Matrix([[x] for x in x_i]+[[1]]) #bias
 
         #compute node values
@@ -62,10 +58,7 @@ class DN(object):
         """
 
         n_params = len(self.params)
-        
-        for i in range(n_params-1):
-            self.delta.append(Matrix([[0] for n in range(self.params[i]+1)]))
-        self.delta.append(Matrix([[0] for i in range(self.params[-1])]))
+        self.delta = [False for i in range(n_params)]
 
         #compute deltas
         backward_range = range(1,n_params-1)[::-1]
@@ -140,7 +133,7 @@ class DN(object):
 
 #====== TESTCODE ==============
 '''
-clf = DN(layers=[],act='relu')#,reg='l2')
+clf = DN(layers=[2,3],act='relu')#,reg='l2')
 X,Y = [[1],[2]],[[2],[4]]
 clf.fit(X,Y,iters=200,lr = 0.01)
 predictions = clf.predict(X)
