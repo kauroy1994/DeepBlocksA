@@ -40,10 +40,10 @@ class DN(object):
         n_params = len(self.params)
 
         for i in range(n_params-1):
-            self.network.append([[0] for n in range(self.params[i])])
-        self.network.append([[0] for i in range(self.params[-1])])
+            self.network.append([[0] for n in range(self.params[i]+1)])
+        self.network.append([[0] for i in range(self.params[-1]+1)])
         
-        self.network[0] = Matrix([[x] for x in x_i])
+        self.network[0] = Matrix([[x] for x in x_i]+[[1]]) #bias
 
         #compute node values
         for i in range(1,n_params):
@@ -53,6 +53,7 @@ class DN(object):
                     self.network[i] = self.network[i].sigmoid()
                 elif self.act == 'relu':
                     self.network[i] = self.network[i].relu()
+                self.network[i] = Matrix(self.network[i].array + [[1]]) #bias
             else:
                 self.network[i] = self.network[i]
 
@@ -63,15 +64,15 @@ class DN(object):
         n_params = len(self.params)
         
         for i in range(n_params-1):
-            self.delta.append([[0] for n in range(self.params[i])])
-        self.delta.append([[0] for i in range(self.params[-1])])
+            self.delta.append(Matrix([[0] for n in range(self.params[i]+1)]))
+        self.delta.append(Matrix([[0] for i in range(self.params[-1])]))
 
         #compute deltas
         backward_range = range(1,n_params-1)[::-1]
-        self.delta[n_params-1] = (self.network[n_params-1].grad(a='lin') * error_grad)        
+        self.delta[n_params-1] = (self.network[n_params-1].grad(a='lin') * error_grad)
         for i in backward_range:
             self.delta[i] = (self.network[i].grad(a=self.act)) @ (self.Ws[i] * self.delta[i+1])
-
+            self.delta[i] = Matrix(self.delta[i].array[:-1])
 
     def back_prop(self,y_i,e_grad,r=0.01):
         """propagates chain rule grads
@@ -81,7 +82,7 @@ class DN(object):
 
         n_params = len(self.params)
         self.compute_deltas(y_i,e_grad)
-
+        
         #compute gradients        
         for i in range(1,n_params):
             n,m = self.Ws[i-1].dim()[0],self.Ws[i-1].dim()[1]
@@ -107,21 +108,19 @@ class DN(object):
 
         N = len(X)
         
-        self.params = [len(X[0])+1] + self.layers + [1] #one label, add ones for bias
+        self.params = [len(X[0])] + self.layers + [1] #one label, add ones for bias
         params = self.params
         n_params = len(params)
         
         for i in range(n_params-1):
-            self.Ws.append(Matrix([[1.0 for k in range(params[i+1])] for j in range(params[i])]))
+            self.Ws.append(Matrix([[1.0 for k in range(params[i+1])] for j in range(params[i]+1)]))
             
         for it in range(iters):
             e_grad = Matrix([[0.0]]) 
             for i in range(N):
-                x_i = X[i]+[1] #bias
+                x_i = X[i]
                 y_i = Y[i]
                 self.feed_forward(x_i)
-                #e_grad = (self.network[n_params-1] - Matrix([y_i])), for SGD
-                #self.back_prop(y_i,e_grad,r=lr)
                 e_grad += (self.network[n_params-1] - Matrix([y_i]))
             e_grad.array[0][0] /= N
             self.back_prop(y_i,e_grad,r=lr)
@@ -133,7 +132,7 @@ class DN(object):
         N = len(X)
         predictions = []
         for i in range(N):
-            x_i = X[i] + [1] #bias
+            x_i = X[i]
             self.feed_forward(x_i)
             predictions.append(self.network[len(self.params)-1])
 
@@ -141,7 +140,7 @@ class DN(object):
 
 #====== TESTCODE ==============
 '''
-clf = DN(layers=[10],act='relu')#,reg='l2')
+clf = DN(layers=[],act='relu')#,reg='l2')
 X,Y = [[1],[2]],[[2],[4]]
 clf.fit(X,Y,iters=200,lr = 0.01)
 predictions = clf.predict(X)
