@@ -228,6 +228,8 @@ class Contagion(object):
         """if ill estimate < free beds
         """
 
+        free_beds = 0
+        
         for hospital in self.hospitals:
             n = len(self.hospitals[hospital])
             for i in range(n):
@@ -1081,9 +1083,10 @@ class Simulator(object):
         s = Contagion()
         episode = []
         start = time()
+        c = 0
         while True:
-            if time() - start > 2: #max 2 second latency
-                return False
+            if s.goal() or c == 10:
+                break
             action = Simulator.get_action(s,policy)
             if not s.act(action):
                 continue
@@ -1092,27 +1095,14 @@ class Simulator(object):
                 s = s.act(action)
                 action_pred = s.action_pred(action)
                 episode.append([s_current,deepcopy(action_pred)])
+                c += 1
+        return episode
 #===============TEST FUNCTION============
 '''
-s0 = Contagion()
-print (s0.n)
-print ('reward: ',s0.reward())
-action = Simulator.get_action(s0)
-print (action)
-print (s0.action_pred(action))
-s1 = s0.act(action)
-if not s1:
-    exit()
-print ('-'*40)
-print (s1.n)
-print ('reward: ',s1.reward())
-action = Simulator.get_action(s1)
-print (action)
-print (s1.action_pred(action))
-s2 = s1.act(action)
-if not s2:
-    exit()
-print ('-'*40)
-print (s2.n)
-print ('reward: ',s2.reward())
+e = Simulator.generate_episode()
+for sa in e:
+    print ('-'*40)
+    print (sa[0].n)
+    print (sa[0].reward())
+    print (sa[1])
 '''
