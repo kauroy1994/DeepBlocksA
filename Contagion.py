@@ -26,6 +26,9 @@ class Contagion(object):
         #init_perc % of persons initially ill
         self.ill = [int(random() < init_perc) for i in range(pop)]
 
+        #record is person has been tested
+        self.tested = [0 for i in range(pop)]
+
         #record self isolation of persons in case of no beds
         self.isolated = [0 for i in range(pop)]
 
@@ -89,6 +92,7 @@ class Contagion(object):
         #hospitalize ill persons or isolate
         for i in range(n_persons):
             if random() < testing_rate:
+                self.tested[i] = 1
                 if self.ill[i]:
                     no_beds = True
                     for hospital in self.hospitals:
@@ -185,6 +189,31 @@ class Contagion(object):
                         self.hospitalized[person] = 0
                         #self.out still 1 as person recovered,
                         #and assumed immune
+
+        #a third of those in isolation recover
+        for i in range(n_persons):
+            self.isolated[i] = 0 #self.out still 1 - recovered
+
+    def reward(self,typ = 'hosp'):
+        """returns number of free beds + recovered
+           after at least 50% of population tested
+        """
+
+        free_beds = 0
+        recovered = 0
+        n_persons = len(self.persons)
+        if (sum(self.tested)/float(n_persons)) >= 0.5:
+            for hospital in self.hospitals:
+                n = len(self.hospitals[hospital])
+                for i in range(n):
+                    person = self.hospitals[hospital][i]
+                    if not person:
+                        free_beds += 1
+            for i in range(n_persons):
+                if self.hospitalized[i] == 0 and self.out[i] == 1:
+                    recovered += 1
+                    
+        return free_beds + recovered
                         
 
     def create_KG(self,dot = False):
@@ -1033,7 +1062,8 @@ class Simulator(object):
             else:
                 s_current = deepcopy(s)
                 s = s.act(action)
-                episode.append([s_current,deepcopy(action)])
+                action_pred = s.action_pred(action)
+                episode.append([s_current,deepcopy(action_pred)])
 #===============TEST FUNCTION============
 '''
 s0 = Contagion()
