@@ -219,9 +219,10 @@ class Contagion(object):
                 recovered += 1
 
         untested = n_persons - sum(self.tested)
-        active_estimate = 0.1*untested #10% of untested ill
-        
-        return (n_persons - (active + active_estimate))
+        active_estimate = 0.5*untested #50% of untested ill
+
+        #return normalized reward
+        return ((n_persons - (active + active_estimate))/float(n_persons))
 
     def goal(self,typ = 'hosp'):
         """if ill estimate < free beds
@@ -542,6 +543,9 @@ class Contagion(object):
                 return False
 
             next_state.test_r += 0.1
+
+        elif action[0] == 3:
+            return next_state
 
         next_state.hospitalize_and_transmit(self.test_r)
         next_state.create_KG(dot = False)
@@ -1091,13 +1095,24 @@ class Simulator(object):
 #===============TEST FUNCTION============
 '''
 s0 = Contagion()
-print (s0)
+print (s0.n)
 print ('reward: ',s0.reward())
 action = Simulator.get_action(s0)
 print (action)
 print (s0.action_pred(action))
 s1 = s0.act(action)
+if not s1:
+    exit()
 print ('-'*40)
-print (s1)
+print (s1.n)
 print ('reward: ',s1.reward())
+action = Simulator.get_action(s1)
+print (action)
+print (s1.action_pred(action))
+s2 = s1.act(action)
+if not s2:
+    exit()
+print ('-'*40)
+print (s2.n)
+print ('reward: ',s2.reward())
 '''
