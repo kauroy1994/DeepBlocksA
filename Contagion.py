@@ -195,26 +195,50 @@ class Contagion(object):
             self.isolated[i] = 0 #self.out still 1 - recovered
 
     def reward(self,typ = 'hosp'):
-        """returns number of free beds + recovered
-           after at least 50% of population tested
+        """returns not ill estimate
         """
 
         free_beds = 0
         recovered = 0
+        active = 0
         n_persons = len(self.persons)
-        if (sum(self.tested)/float(n_persons)) >= 0.5:
-            for hospital in self.hospitals:
-                n = len(self.hospitals[hospital])
-                for i in range(n):
-                    person = self.hospitals[hospital][i]
-                    if not person:
-                        free_beds += 1
-            for i in range(n_persons):
-                if self.hospitalized[i] == 0 and self.out[i] == 1:
-                    recovered += 1
-                    
-        return free_beds + recovered
-                        
+        for hospital in self.hospitals:
+            n = len(self.hospitals[hospital])
+            for i in range(n):
+                person = self.hospitals[hospital][i]
+                if not person:
+                    free_beds += 1
+        for i in range(n_persons):
+            if self.hospitalized[i] == 1:
+                active += 1
+            if self.isolated[i] == 1:
+                active += 1
+            if self.hospitalized[i] == 0 and self.out[i] == 1:
+                recovered += 1
+            if self.isolated[i] == 0 and self.out[i] == 1:
+                recovered += 1
+
+        untested = n_persons - sum(self.tested)
+        active_estimate = 0.1*untested #10% of untested ill
+        
+        return (n_persons - (active + active_estimate))
+
+    def goal(self,typ = 'hosp'):
+        """if ill estimate < free beds
+        """
+
+        for hospital in self.hospitals:
+            n = len(self.hospitals[hospital])
+            for i in range(n):
+                person = self.hospitals[hospital][i]
+                if not person:
+                    free_beds += 1
+
+        n_persons = len(self.persons)
+        
+        if n_persons - self.reward() < free_beds:
+            return True
+        return False
 
     def create_KG(self,dot = False):
         """creates Knowledge Graph
@@ -1037,7 +1061,7 @@ class Simulator(object):
                         'q(+state,-per)',
                         'nilpolicy(+state)']}
     @staticmethod
-    def get_action(s,policy):
+    def get_action(s,policy = None):
         """gets best action according
            given state and policy
         """
@@ -1067,8 +1091,13 @@ class Simulator(object):
 #===============TEST FUNCTION============
 '''
 s0 = Contagion()
-action = s0.random()
+print (s0)
+print ('reward: ',s0.reward())
+action = Simulator.get_action(s0)
 print (action)
 print (s0.action_pred(action))
 s1 = s0.act(action)
+print ('-'*40)
+print (s1)
+print ('reward: ',s1.reward())
 '''
