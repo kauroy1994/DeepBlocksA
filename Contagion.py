@@ -421,21 +421,39 @@ class Contagion(object):
         elif action[0] == 2 or action[0] == 3:
             return action
 
-    def action_pred(self,action): #Need to modify this ASAP
+    def action_pred(self,action): 
         """returns predicate form of action
         """
 
         if action[0] == 0:
-            return "lockdown(s"+str(self.n)+","+action[1]+")"
+            if 'shop' in action[1]:
+                return "lockshop(s"+str(self.n)+","+action[1]+")"
+            elif 'work' in action[1]:
+                return "lockwork(s"+str(self.n)+","+action[1]+")"
+            elif 'res' in action[1]:
+                return "lockres(s"+str(self.n)+","+action[1]+")"
+            elif 'h' in action[1]:
+                return "lockhouse(s"+str(self.n)+","+action[1]+")"
+            else:
+                return "locktrack(s"+str(self.n)+","+action[1]+")"
 
         elif action[0] == 1:
-            return "unlock(s"+str(self.n)+","+action[1]+")"
+            if 'shop' in action[1]:
+                return "unlockshop(s"+str(self.n)+","+action[1]+")"
+            elif 'work' in action[1]:
+                return "unlockwork(s"+str(self.n)+","+action[1]+")"
+            elif 'res' in action[1]:
+                return "unlockres(s"+str(self.n)+","+action[1]+")"
+            elif 'h' in action[1]:
+                return "unlockhouse(s"+str(self.n)+","+action[1]+")"
+            else:
+                return "unlocktrack(s"+str(self.n)+","+action[1]+")"
 
         elif action[0] == 2:
-            return "incr_test(s"+str(self.n)+")"
+            return "incrtestr(s"+str(self.n)+")"
 
         elif action[0] == 3:
-            return "noop(s"+str(self.n)+")"
+            return "nilpolicy(s"+str(self.n)+")"
 
     def act(self,action):
         """[0,<loc>]: locksdown location
@@ -473,7 +491,7 @@ class Contagion(object):
             next_state.test_r += 0.1
 
         next_state.hospitalize_and_transmit(self.test_r)
-        next_state.create_KG(dot = True)
+        next_state.create_KG(dot = False)
         
         return next_state
 
@@ -989,6 +1007,15 @@ class Simulator(object):
                         'q(+state,+per)',
                         'q(+state,-per)',
                         'nilpolicy(+state)']}
+
+    @staticmethod
+    def generate_episode(policy = None):
+        """generates trajectory by
+           following the policy specified
+        """
+
+        s = Contagion()
+        pass
         
 #===============TEST FUNCTION============
 '''
