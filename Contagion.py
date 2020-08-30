@@ -1007,6 +1007,13 @@ class Simulator(object):
                         'q(+state,+per)',
                         'q(+state,-per)',
                         'nilpolicy(+state)']}
+    @staticmethod
+    def get_action(s,policy):
+        """gets best action according
+           given state and policy
+        """
+
+        return s.random()
 
     @staticmethod
     def generate_episode(policy = None):
@@ -1015,8 +1022,18 @@ class Simulator(object):
         """
 
         s = Contagion()
-        pass
-        
+        episode = []
+        start = time()
+        while True:
+            if time() - start > 2: #max 2 second latency
+                return False
+            action = Simulator.get_action(s,policy)
+            if not s.act(action):
+                continue
+            else:
+                s_current = deepcopy(s)
+                s = s.act(action)
+                episode.append([s_current,deepcopy(action)])
 #===============TEST FUNCTION============
 '''
 s0 = Contagion()
