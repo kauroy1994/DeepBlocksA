@@ -238,9 +238,16 @@ class Contagion(object):
                     free_beds += 1
 
         n_persons = len(self.persons)
+
+        print (n_persons)
+        print (self.reward()*n_persons)
+        print (free_beds)
+        print (n_persons - (self.reward()*n_persons) <= free_beds)
+        input()
         
-        if n_persons - self.reward() < free_beds:
+        if n_persons - (self.reward()*n_persons) <= free_beds:
             return True
+        
         return False
 
     def create_KG(self,dot = False):
@@ -1105,4 +1112,5 @@ for sa in e:
     print (sa[0].n)
     print (sa[0].reward())
     print (sa[1])
+
 '''
