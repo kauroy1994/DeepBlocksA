@@ -238,12 +238,14 @@ class Contagion(object):
                     free_beds += 1
 
         n_persons = len(self.persons)
-
+        
+        '''
         print (n_persons)
         print (self.reward()*n_persons)
         print (free_beds)
         print (n_persons - (self.reward()*n_persons) <= free_beds)
         input()
+        '''
         
         if n_persons - (self.reward()*n_persons) <= free_beds:
             return True
@@ -1082,17 +1084,19 @@ class Simulator(object):
         return s.random()
 
     @staticmethod
-    def generate_episode(policy = None):
+    def generate_episode(policy = None,s_number = 0):
         """generates trajectory by
            following the policy specified
         """
 
-        s = Contagion()
+        s = Contagion(n = s_number)
         episode = []
         start = time()
         c = 0
         while True:
-            if s.goal() or c == 10:
+            if time() - start > 2:
+                return False
+            if s.goal(): #or c == 10:
                 break
             action = Simulator.get_action(s,policy)
             if not s.act(action):
@@ -1112,5 +1116,4 @@ for sa in e:
     print (sa[0].n)
     print (sa[0].reward())
     print (sa[1])
-
 '''
