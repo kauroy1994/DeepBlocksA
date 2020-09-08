@@ -5,3 +5,5 @@ Experiments on Knowledge infusion in Policy-Gradient methods applied to real wor
 Monte Carlo Sampling used for Q values.
 
 Extra notes: [Sklearn MLP regressor documentation](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)
+
+**Current state of project - PhiMap: Feature learner has error**
