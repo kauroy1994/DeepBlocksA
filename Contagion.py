@@ -285,7 +285,7 @@ class Contagion(object):
                 facts.append("open(track"+track.split('t')[1]+")")
             for est in self.tracks[track]:
                 if 'res' in est:
-                    if not self.locked[est]:
+                    if not self.locked[est] and not self.locked[track]:
 
                         #establishment (residence) is open
                         facts.append("open("+est+")")
@@ -293,7 +293,7 @@ class Contagion(object):
                     #establishment (residence) on particular track
                     facts.append("on("+est+",track"+track.split('t')[1]+")")
                     for house in self.tracks[track][est]:
-                        if not self.locked[house]:
+                        if not self.locked[house] and not self.locked[track]:
 
                             #house is open
                             facts.append("open(house"+str(int(house.split('h')[1])+1)+")")
@@ -301,7 +301,7 @@ class Contagion(object):
                         #house is in this establishment (residence)
                         facts.append("part_of(house"+str(int(house.split('h')[1])+1)+","+est+")")
                 elif 'shop' in est:
-                    if not self.locked[est]:
+                    if not self.locked[est] and not self.locked[track]:
 
                         #establishment (shop) is open
                         facts.append("open("+est+")")
@@ -309,7 +309,7 @@ class Contagion(object):
                     #establishment (shop) on particular track
                     facts.append("on("+est+",track"+track.split('t')[1]+")")
                 elif 'work' in est:
-                    if not self.locked[est]:
+                    if not self.locked[est] and not self.locked[track]:
 
                         #establishment (work) is open
                         facts.append("open("+est+")")
@@ -411,7 +411,7 @@ class Contagion(object):
                 facts.append("topen(s"+str(self.n)+","+track+")")
             for est in self.tracks[track]:
                 if 'res' in est:
-                    if not self.locked[est]:
+                    if not self.locked[est] and not self.locked[track]:
 
                         #establishment (residence) is open
                         facts.append("ropen(s"+str(self.n)+","+est+")")
@@ -419,7 +419,7 @@ class Contagion(object):
                     #establishment (residence) on particular track
                     facts.append("ron(s"+str(self.n)+","+est+","+track+")")
                     for house in self.tracks[track][est]:
-                        if not self.locked[house]:
+                        if not self.locked[house] and not self.locked[track]:
 
                             #house is open
                             facts.append("hopen(s"+str(self.n)+","+house+")")
@@ -427,7 +427,7 @@ class Contagion(object):
                         #house is in this establishment (residence)
                         facts.append("hin(s"+str(self.n)+","+house+","+est+")")
                 elif 'shop' in est:
-                    if not self.locked[est]:
+                    if not self.locked[est] and not self.locked[track]:
 
                         #establishment (shop) is open
                         facts.append("sopen(s"+str(self.n)+","+est+")")
@@ -435,7 +435,7 @@ class Contagion(object):
                     #establishment (shop) on particular track
                     facts.append("son(s"+str(self.n)+","+est+","+track+")")
                 elif 'work' in est:
-                    if not self.locked[est]:
+                    if not self.locked[est] and not self.locked[track]:
 
                         #establishment (work) is open
                         facts.append("wopen(s"+str(self.n)+","+est+")")
